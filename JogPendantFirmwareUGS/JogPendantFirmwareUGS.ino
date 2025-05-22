@@ -1,6 +1,6 @@
 /*  Author:   Seth Victus
     Date:     22-05-2025
-    Version:  0.1
+    Version:  0.2
     Note: Firmware built for an 18 button CNC jogging device. This converts the button matrix into XInput data 
     that can be used in combination with Universal GCode Sender. The button matrix layout was very strange and 
     was manually reverse engineerd which is why the firmware uses a pin pair concept as pure matrix scanning 
@@ -69,27 +69,19 @@ void loop() {
     //END DEBUG ONLY
 
     //Prepare XInput report for sending
-    XInput.setButton(BUTTON_LOGO, portPairs[4][2]); //Centre Button
-    //Diagonal jog axis
-    XInput.setButton(BUTTON_A, portPairs[0][2]);
-    XInput.setButton(BUTTON_B, portPairs[2][2]);
-    XInput.setButton(BUTTON_X, portPairs[6][2]);
-    XInput.setButton(BUTTON_Y, portPairs[8][2]);
+
+    XInput.setButton(BUTTON_A, portPairs[4][2]); //Centre Button
     //X Y Z buttons
-    XInput.setButton(BUTTON_LB, portPairs[9][2]);
-    XInput.setButton(BUTTON_RB, portPairs[10][2]);
-    XInput.setButton(BUTTON_BACK, portPairs[11][2]);
+    XInput.setButton(BUTTON_X, portPairs[9][2]);
+    XInput.setButton(BUTTON_Y, portPairs[10][2]);
+    XInput.setButton(BUTTON_B, portPairs[11][2]);
     //F1 / Ur 
     XInput.setButton(BUTTON_START, portPairs[12][2]);
     XInput.setButton(BUTTON_L3, portPairs[13][2]);
     //Back / Ul
-    XInput.setButton(BUTTON_R3, portPairs[15][2]);
-    XInput.setButton(TRIGGER_RIGHT, portPairs[16][2]);
-    // if(portPairs[16][2] == 1){
-    //   XInput.setTrigger(TRIGGER_RIGHT,1);
-    // } else {
-    //   XInput.setTrigger(TRIGGER_RIGHT, 0);
-    // }
+    XInput.setButton(BUTTON_BACK, portPairs[15][2]);
+    XInput.setButton(BUTTON_R3, portPairs[16][2]);
+
 
     //Z+ / Z-
     if(portPairs[14][2] != portPairs[17][2]){ // check if not both 0 or 1
@@ -101,8 +93,21 @@ void loop() {
     } else if (portPairs[14][2] == 0){ // check if both are 0, if so return axis to 0
       XInput.setJoystickX(JOY_LEFT, 0);
     }
-    //X and Y axis
-    XInput.setDpad(portPairs[1][2],portPairs[7][2],portPairs[3][2],portPairs[5][2]);
+
+    // X / Y Axis
+    if((portPairs[1][2] + portPairs[7][2] + portPairs[3][2] + portPairs[5][2] + portPairs[0][2] + portPairs[2][2] + portPairs[6][2] + portPairs[8][2]) == 1){ //check if only 1 button of the directional keys is pressed
+      if(portPairs[0][2] == 1){ XInput.setJoystick(JOY_RIGHT,-1000,1000);}         //NW
+      else if(portPairs[1][2] == 1){ XInput.setJoystick(JOY_RIGHT,0,1000);}        //N
+      else if(portPairs[2][2] == 1){ XInput.setJoystick(JOY_RIGHT,1000,1000);}     //NE
+      else if(portPairs[3][2] == 1){ XInput.setJoystick(JOY_RIGHT,-1000,0);}       //W
+      else if(portPairs[5][2] == 1){ XInput.setJoystick(JOY_RIGHT,1000,0);}        //E
+      else if(portPairs[6][2] == 1){ XInput.setJoystick(JOY_RIGHT,-1000,-1000);}   //SW
+      else if(portPairs[7][2] == 1){ XInput.setJoystick(JOY_RIGHT,0,-1000);}       //S
+      else if(portPairs[8][2] == 1){ XInput.setJoystick(JOY_RIGHT,1000,-1000);}    //SE
+    } else {
+      XInput.setJoystick(JOY_RIGHT,0,0); //Reset to 0,0
+    }
+
     XInput.send();
   }
   
